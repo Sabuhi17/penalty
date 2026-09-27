@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#04170c">
+<title>Penalti Bilik Yarışı — Sosial siyasətin obyekti və subyekti</title>
+<meta name="description" content="Sosial siyasətin obyekti və subyekti mövzusu üzrə penalti-üslublu bilik oyunu.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9A%BD%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --grass1:#1c8a3e; --grass2:#146b2e; --line:#f2fff5; --ink:#04170c;
+  --panel:#0a2415; --panel2:#0e2f1b; --gold:#ffd35c; --orange:#ff9d1c;
+  --green:#25c45f; --red:#e04a52; --sky1:#8fd8ff; --sky2:#eaf9ff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  font-family:"Montserrat","Segoe UI",system-ui,-apple-system,Arial,sans-serif;
+  color:#fff; background:#03130a; -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+[hidden]{display:none!important}
+
+/* ---------- Səhnə ---------- */
+.stage{position:relative; min-height:100vh; min-height:100dvh; overflow:hidden;
+  background:linear-gradient(180deg,var(--sky1) 0%, var(--sky2) 30%, var(--grass1) 30%, var(--grass2) 100%);}
+.stands{position:absolute; left:0; right:0; top:0; height:30vh; pointer-events:none;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.14) 0 8px, transparent 8px 16px) bottom/100% 40% no-repeat,
+    linear-gradient(180deg,#3b6fa8,#8fd8ff 85%);}
+main{position:relative; z-index:1; min-height:100vh; min-height:100dvh}
+.screen{display:none; min-height:100vh; min-height:100dvh}
+.screen.active{display:flex}
+#screen-game.active{display:flex; flex-direction:column}
+
+/* ---------- Ümumi düymələr ---------- */
+.cta{
+  --cut:22px; appearance:none; border:0; cursor:pointer; color:#08240f;
+  font-weight:800; font-size:1.1rem; padding:1rem 3.2rem; letter-spacing:.02em;
+  background:linear-gradient(180deg,#ffe27a,#ffb23e);
+  clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% 50%,calc(100% - var(--cut)) 100%,var(--cut) 100%,0 50%);
+  transition:filter .15s, transform .15s;
+}
+.cta:hover:not(:disabled){filter:brightness(1.1)}
+.cta:active:not(:disabled){transform:scale(.98)}
+.cta:disabled{opacity:.45; cursor:not-allowed}
+.cta.small{font-size:.95rem; padding:.8rem 2rem}
+.cta:focus-visible,.ghost:focus-visible,.pcard:focus-visible,.hex:focus-visible{outline:3px solid #fff; outline-offset:3px}
+.ghost{appearance:none; cursor:pointer; background:rgba(4,23,12,.55); color:#eafff1;
+  border:2px solid #bff0cf; border-radius:999px; padding:.75rem 1.6rem; font-weight:700; font-size:.95rem;}
+.ghost:hover{border-color:var(--orange); color:#fff}
+
+/* ---------- Başlanğıc ---------- */
+#screen-start{flex-direction:column; align-items:center; justify-content:flex-start; text-align:center; padding:34px 18px 40px; gap:18px;}
+.badge{width:96px; height:96px; border-radius:50%; display:grid; place-items:center;
+  background:radial-gradient(circle at 34% 30%,#fff,#dfe8ff 40%,#93a2d8 70%,#5563a8 100%);
+  box-shadow:0 10px 22px rgba(0,0,0,.35), inset 0 -6px 10px rgba(0,0,0,.25), inset 0 4px 8px rgba(255,255,255,.7);}
+.badge svg{width:56px; height:56px}
+h1{margin:0; font-weight:900; letter-spacing:.02em; line-height:1.05; font-size:clamp(1.7rem,6vw,2.7rem); text-shadow:0 3px 0 rgba(0,0,0,.35)}
+h1 span{color:var(--gold)}
+.lead{margin:0; max-width:600px; color:#eafff1; font-weight:600; line-height:1.5}
+.rules{list-style:none; margin:0; padding:0; display:grid; gap:.5rem; max-width:560px; text-align:left; font-weight:600; color:#eafff1; line-height:1.45;}
+.rules li{position:relative; padding-left:1.5rem}
+.rules li::before{content:"⚽"; position:absolute; left:-.15rem; top:-.05em; font-size:.85em}
+.namewrap{width:min(420px,92vw); text-align:left}
+.namewrap label{display:block; font-weight:700; font-size:.85rem; color:var(--gold); margin-bottom:.35rem}
+.namewrap input{
+  width:100%; padding:.75rem 1rem; border-radius:12px; border:2px solid #bff0cf; background:rgba(4,23,12,.5);
+  color:#fff; font:inherit; font-weight:600;
+}
+.namewrap input::placeholder{color:#bcd8c6}
+
+.roster-h{margin:6px 0 0; font-weight:800; color:var(--gold); letter-spacing:.04em; font-size:.95rem}
+.roster{display:grid; grid-template-columns:repeat(auto-fit,minmax(132px,1fr)); gap:12px; width:min(760px,94vw);}
+.pcard{
+  position:relative; cursor:pointer; border:2px solid rgba(255,255,255,.25); border-radius:16px;
+  padding:12px 10px 10px; background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(0,0,0,.18));
+  display:flex; flex-direction:column; align-items:center; gap:6px; transition:transform .15s, border-color .15s, background .15s;
+}
+.pcard:hover{transform:translateY(-3px); border-color:rgba(255,255,255,.55)}
+.pcard.sel{border-color:var(--gold); background:linear-gradient(180deg,rgba(255,211,92,.28),rgba(255,138,0,.16)); box-shadow:0 0 0 3px rgba(255,211,92,.35);}
+.pcard .jersey{width:72px; height:78px}
+.pcard b{font-size:.92rem}
+.pcard small{color:#cfe9d8; font-size:.76rem}
+.meta{margin:0; color:#cfe9d8; font-size:.85rem; font-weight:600}
+.linkbtn{background:none; border:0; color:#eafff1; text-decoration:underline; cursor:pointer; font-weight:600; font-size:.85rem; padding:.2rem}
+.linkbtn:hover{color:#fff}
+
+/* ---------- Oyun ekranı ---------- */
+#screen-game{width:100%; max-width:1100px; margin:0 auto; padding:clamp(10px,2vw,20px); gap:14px;}
+.topbar{display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  background:rgba(4,23,12,.55); border:1px solid rgba(255,255,255,.18); border-radius:14px; padding:.6rem 1rem;}
+.who{display:flex; align-items:center; gap:10px; font-weight:800}
+.who .mini{width:34px; height:38px}
+.kicks{display:flex; gap:8px}
+.kicks .dot{width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,.22); border:2px solid rgba(255,255,255,.45)}
+.kicks .dot.goal{background:var(--green); border-color:#bff5cf}
+.kicks .dot.miss{background:var(--red); border-color:#ffc7c9}
+.kicks .dot.cur{outline:2px solid var(--gold); outline-offset:2px}
+.lvl{font-weight:800; color:var(--gold); font-size:.9rem; letter-spacing:.03em}
+.stars{letter-spacing:2px}
+
+/* Pitch / meydança */
+.pitch{position:relative; border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,.25);
+  background:
+    repeating-linear-gradient(90deg, var(--grass1) 0 60px, var(--grass2) 60px 120px);
+  min-height:clamp(230px,32vw,300px); display:flex; align-items:flex-end; justify-content:center;}
+.pitch .arc{position:absolute; left:50%; top:6%; width:220px; height:110px; transform:translateX(-50%);
+  border:3px solid rgba(255,255,255,.55); border-top:0; border-radius:0 0 110px 110px;}
+.goal{position:absolute; left:50%; top:2%; transform:translateX(-50%); width:min(78%,460px); height:34%;}
+.goal .posts{position:absolute; inset:0; border:6px solid var(--line); border-bottom:0; border-radius:4px 4px 0 0;
+  box-shadow:0 4px 10px rgba(0,0,0,.25);}
+.goal .net{position:absolute; inset:6px 6px 0 6px;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,.55) 0 1px, transparent 1px 11px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,.55) 0 1px, transparent 1px 11px);
+  opacity:.85; transition:transform .18s ease;}
+.goal.ripple .net{animation:ripple .5s ease}
+@keyframes ripple{0%{transform:scale(1)}30%{transform:scale(.94,1.08)}60%{transform:scale(1.05,.94)}100%{transform:scale(1)}}
+.zone{position:absolute; top:6%; width:32%; height:26%; }
+.zone.L{left:4%} .zone.C{left:34%} .zone.R{left:64%}
+
+.actor{position:absolute; bottom:6%; left:50%; width:56px; height:92px; transform:translate(-50%,0);
+  transition:left 1s cubic-bezier(.25,.7,.3,1), bottom 1s cubic-bezier(.25,.7,.3,1);}
+.ball{position:absolute; bottom:9%; left:50%; width:26px; height:26px; transform:translate(-50%,0);
+  transition:left .55s cubic-bezier(.3,-0.1,.3,1.15), top .55s cubic-bezier(.3,-0.1,.3,1.15), transform .55s;
+  top:auto;}
+.ball svg{width:100%; height:100%; filter:drop-shadow(0 3px 3px rgba(0,0,0,.4))}
+.gk{position:absolute; top:18%; left:50%; width:52px; height:70px; transform:translate(-50%,0);
+  transition:left .5s cubic-bezier(.3,-0.1,.3,1.2), transform .5s cubic-bezier(.3,-0.1,.3,1.2);}
+
+/* Stilizə "3D-render" oyunçu fiqurları (SVG, gradient bevel ilə) */
+.fig{width:100%; height:100%}
+.fig .shadow{fill:rgba(0,0,0,.32)}
+.fig .skin{fill:url(#skinGrad)}
+.fig .sock{fill:url(#sockGrad)}
+.fig .boot{fill:#171a1f}
+
+.result-banner{
+  position:absolute; left:50%; top:14%; transform:translate(-50%,-14px) scale(.85); z-index:6; opacity:0; pointer-events:none;
+  --cut:22px; padding:.7rem 2.2rem; font-weight:900; font-size:clamp(1.2rem,4.4vw,2rem); text-align:center; white-space:nowrap;
+  background:linear-gradient(180deg,#2fd26b,#0d8a3b); color:#fff; transition:opacity .2s, transform .2s;
+  clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% 50%,calc(100% - var(--cut)) 100%,var(--cut) 100%,0 50%);
+}
+.result-banner.bad{background:linear-gradient(180deg,#e5484d,#8f1620)}
+.result-banner.show{opacity:1; transform:translate(-50%,0) scale(1)}
+
+/* Sual / cavab ---- (əvvəlki hex üslubu) */
+.mid{display:flex; flex-direction:column; align-items:center; gap:10px; padding:6px 0 0}
+.timer{position:relative; width:clamp(66px,9vw,86px); aspect-ratio:1; --tc:#c8f5d6}
+.timer svg{width:100%; height:100%; transform:rotate(-90deg); overflow:visible}
+.timer .trk{fill:rgba(4,23,12,.85); stroke:rgba(255,255,255,.22); stroke-width:6}
+.timer .bar{fill:none; stroke:var(--tc); stroke-width:6; stroke-linecap:round; stroke-dasharray:276.46; stroke-dashoffset:0; filter:drop-shadow(0 0 6px var(--tc));}
+.timer .num{position:absolute; inset:0; display:grid; place-items:center; font-weight:900; font-size:clamp(1.3rem,3.4vw,1.9rem)}
+.timer.warn{--tc:var(--orange)} .timer.crit{--tc:var(--red)}
+.timer.crit .num{color:#ffb3b6; animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.14)}}
+.qa{width:100%; max-width:820px; margin:0 auto; display:flex; flex-direction:column; gap:12px}
+.hex{--cut:22px; display:block; width:100%; padding:3px; border:0; margin:0; cursor:pointer; text-align:left; color:#fff;
+  background:linear-gradient(180deg,#d6ffe3,#5fb37a);
+  clip-path:polygon(var(--cut) 0,calc(100% - var(--cut)) 0,100% 50%,calc(100% - var(--cut)) 100%,var(--cut) 100%,0 50%);}
+.hex .in{display:flex; align-items:center; gap:.7rem; min-height:56px; padding:.5rem calc(var(--cut) + 8px);
+  background:linear-gradient(180deg,#123a20,#081f12);
+  clip-path:polygon(calc(var(--cut) - 1px) 0,calc(100% - var(--cut) + 1px) 0,calc(100% - 1px) 50%,calc(100% - var(--cut) + 1px) 100%,calc(var(--cut) - 1px) 100%,1px 50%);
+  transition:background .2s;}
+.qhex{cursor:default; --cut:26px}
+.qhex .in{min-height:clamp(74px,10vw,96px); justify-content:center; text-align:center}
+.qhex p{margin:0; font-weight:700; font-size:clamp(.95rem,2.1vw,1.28rem); line-height:1.4}
+.arow{display:grid; grid-template-columns:1fr 1fr; gap:12px 30px}
+.slot .L{color:var(--gold); font-weight:800; flex:none}
+.slot .t{font-weight:600; font-size:clamp(.85rem,1.5vw,1rem); line-height:1.32}
+.slot:not(.locked):not(.removed) .hex:hover{filter:brightness(1.2)}
+.slot.sel .hex{background:linear-gradient(180deg,#ffe6b0,#ffb23e)}
+.slot.sel .hex .in{background:linear-gradient(180deg,#5a3b06,#2a1a00)}
+.slot.correct .hex{background:linear-gradient(180deg,#c4ffd9,#25c45f); animation:blink .45s ease-in-out 4 alternate}
+.slot.wrong .hex{background:linear-gradient(180deg,#ffd0d3,#e04a52)}
+.slot.locked .hex{cursor:default}
+@keyframes blink{from{filter:brightness(1)}to{filter:brightness(1.5)}}
+.src{margin:0; text-align:center; min-height:1.2em; color:#cfe9d8; font-size:.8rem; font-weight:600}
+
+/* Nəticə */
+#screen-end{flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px 18px; gap:16px;}
+#screen-end h2{margin:0; font-weight:900; font-size:clamp(1.4rem,5vw,2.2rem)}
+.score{margin:0; font-weight:900; font-size:clamp(2.2rem,8vw,3.6rem); color:var(--gold); text-shadow:0 0 22px rgba(255,157,28,.5)}
+.score small{display:block; font-size:.32em; color:#eafff1; font-weight:700; margin-top:6px}
+.review{width:min(640px,100%); text-align:left; padding:14px 18px; border-radius:14px; background:rgba(4,23,12,.6); border:1px solid rgba(255,255,255,.22); line-height:1.5}
+.review .item{padding:8px 0; border-top:1px solid rgba(255,255,255,.12)}
+.review .item:first-child{border-top:0}
+.review small{color:#cfe9d8; font-weight:600}
+.review .ok{color:#7dffae} .review .no{color:#ff9aa0}
+.confetti{position:fixed; inset:0; pointer-events:none; overflow:hidden; z-index:5}
+.confetti span{position:absolute; top:-16px; width:9px; height:15px; opacity:.95; animation:fall linear forwards}
+@keyframes fall{to{transform:translate3d(var(--dx),110vh,0) rotate(720deg)}}
+
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+noscript p{position:relative; z-index:2; padding:20px; text-align:center}
+
+@media (max-width:700px){
+  .arow{grid-template-columns:1fr; gap:9px}
+  .hex,.qhex{--cut:15px}
+  .roster{grid-template-columns:repeat(3,1fr)}
+  .pcard .jersey{width:56px; height:60px}
+}
+@media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation:none!important; transition:none!important} }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="skinGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd9ad"/><stop offset="1" stop-color="#e3a976"/>
+    </linearGradient>
+    <linearGradient id="sockGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#d9d9d9"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<div class="stage" id="stage">
+  <div class="stands" aria-hidden="true"></div>
+  <main>
+    <!-- BAŞLANĞIC -->
+    <section id="screen-start" class="screen active" aria-labelledby="title">
+      <div class="badge">
+        <svg viewBox="0 0 24 24" aria-hidden="true" fill="#1c2440">
+          <path d="M12 2 2 9l3.8 11.6h12.4L22 9zM12 4.4 18.6 9l-2.5 7.7H7.9L5.4 9zm-1 7.1 2 1.5-.8 2.4h-2.4l-.8-2.4z"/>
+        </svg>
+      </div>
+      <h1 id="title">Penalti <span>Bilik Yarışı</span></h1>
+      <p class="lead">Mövzu 2. Sosial siyasətin obyekti və subyekti üzrə bilik oyunu — hər düzgün cavab bir qol!</p>
+      <ul class="rules">
+        <li>Hər iştirakçıya 5 sual düşür, çətinlik get-gedə artır.</li>
+        <li>Hər suala 15 saniyə var. Düzgün cavab — qol, səhv cavab — atılan zərbə tutulur.</li>
+        <li>Oyun bitəndə neçə qol vurduğunuzu görəcəksiniz.</li>
+        <li>Hər iştirakçı ilə suallar yenilənir — 40 suallıq bazadan təkrarsız seçilir.</li>
+      </ul>
+      <div class="namewrap">
+        <label for="pname">İştirakçının adı (istəyə görə)</label>
+        <input id="pname" type="text" maxlength="40" placeholder="Məs. Aysel">
+      </div>
+      <p class="roster-h">Futbolçunu seç</p>
+      <div class="roster" id="roster"></div>
+      <button class="cta" id="btnStart" type="button" disabled>Penalti zərbələrinə başla</button>
+      <p class="meta" id="bankInfo"></p>
+      <button class="linkbtn" id="btnResetBank" type="button">Sual bazasını sıfırla</button>
+    </section>
+
+    <!-- OYUN -->
+    <section id="screen-game" class="screen" aria-label="Oyun">
+      <div class="topbar">
+        <div class="who"><svg class="mini" id="whoJersey" viewBox="0 0 60 66" aria-hidden="true"></svg><span id="whoName"></span></div>
+        <div class="kicks" id="kicks" aria-hidden="true"></div>
+        <div class="lvl"><span id="lvlText">Səviyyə 1</span> <span class="stars" id="lvlStars"></span></div>
+        <button class="ghost" id="btnSound" type="button" aria-pressed="true">Səs: açıq</button>
+      </div>
+
+      <div class="pitch" id="pitch">
+        <div class="arc" aria-hidden="true"></div>
+        <div class="goal" id="goal"><div class="posts"></div><div class="net"></div></div>
+        <div class="gk" id="gk"></div>
+        <div class="ball" id="ball"></div>
+        <div class="actor" id="actor"></div>
+        <div class="result-banner" id="rbanner" aria-hidden="true"></div>
+      </div>
+
+      <div class="mid">
+        <div class="timer" id="timer" aria-hidden="true">
+          <svg viewBox="0 0 100 100"><circle class="trk" cx="50" cy="50" r="44"/><circle class="bar" id="tbar" cx="50" cy="50" r="44"/></svg>
+          <div class="num" id="tnum">15</div>
+        </div>
+      </div>
+
+      <div class="qa">
+        <div class="slot"><div class="hex qhex"><div class="in"><p id="qtext"></p></div></div></div>
+        <p class="src" id="src"></p>
+        <div class="arow">
+          <div class="slot" data-i="0"><button class="hex ans" type="button"><span class="in"><span class="L">A:</span><span class="t"></span></span></button></div>
+          <div class="slot" data-i="1"><button class="hex ans" type="button"><span class="in"><span class="L">B:</span><span class="t"></span></span></button></div>
+        </div>
+        <div class="arow">
+          <div class="slot" data-i="2"><button class="hex ans" type="button"><span class="in"><span class="L">C:</span><span class="t"></span></span></button></div>
+          <div class="slot" data-i="3"><button class="hex ans" type="button"><span class="in"><span class="L">D:</span><span class="t"></span></span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NƏTİCƏ -->
+    <section id="screen-end" class="screen" aria-live="polite">
+      <h2 id="endTitle"></h2>
+      <p class="score" id="endScore"></p>
+      <p class="lead" id="endText"></p>
+      <div class="review" id="endReview"></div>
+      <div class="btnrow" style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">
+        <button class="cta" id="btnNext" type="button">Növbəti iştirakçı</button>
+        <button class="ghost" id="btnHome" type="button">Ana səhifə</button>
+      </div>
+    </section>
+  </main>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+  <div class="sr" id="sr" role="status" aria-live="polite"></div>
+  <noscript><p>Bu oyun üçün JavaScript aktiv olmalıdır.</p></noscript>
+</div>
+
+<!-- =====================================================================
+     SUAL BAZASI: 5 səviyyə × 8 sual = 40 sual
+     (mənbə: "Mövzu 2. Sosial siyasətin obyekti və subyekti" sənədi)
+     Hər oyunda hər səviyyədən 1 sual seçilir (get-gedə çətinləşən 5 sual);
+     görülən suallar təkrarsızdır, bazadakı hər səviyyə bitəndə yenidən dövr edir.
+     ===================================================================== -->
+<script>
+const Q = (q, ok, wrong, src) => ({ q, a: [ok, ...wrong], src });
+
+const BANK = [
+  // ---- Səviyyə 1 ----
+  [
+    Q("Sosial siyasətin obyekti kimlərdir?", "Əhali, ayrı-ayrı vətəndaşlar və sosial birliklər",
+      ["Yalnız dövlət məmurları", "Xarici investorlar", "Yalnız sahibkarlar"], "Sosial siyasətin obyekti və subyekti"),
+    Q("Sosial siyasətin əsas subyekti hansıdır?", "Dövlət hakimiyyət orqanları, təşkilatları və müəssisələri",
+      ["Bank sistemi", "Xarici turistlər", "Kənd təsərrüfatı işçiləri"], "Sosial siyasətin obyekti və subyekti"),
+    Q("Mətnə görə sosial siyasəti kimlər reallaşdırır?", "Dövlət/yerli idarəetmə orqanları, istehsal kollektivləri, ictimai təşkilatlar",
+      ["Yalnız beynəlxalq təşkilatlar", "Yalnız xarici səfirliklər", "Yalnız media qurumları"], "Sosial siyasətin obyekti və subyekti"),
+    Q("Aşağıdakılardan hansı Azərbaycanda büdcədənkənar sosial fondlardan biridir?", "Dövlət Sosial Müdafiə Fondu",
+      ["Milli Bank Fondu", "İxrac Təşviqi Fondu", "Turizm İnkişaf Fondu"], "Sosial siyasətin obyekti və subyekti"),
+    Q("Sosial siyasətin passiv subyektlərinə aşağıdakılardan hansı aiddir?", "Bank və kredit müəssisələri, sığorta şirkətləri",
+      ["Siyasi partiyalar", "Həmkarlar ittifaqları", "QHT-lər"], "Sosial siyasətin obyekti və subyekti"),
+    Q("Müasir dünyada sosial siyasətin reallaşdırılmasının əsas subyekti kimi kim çıxış edir?", "Dövlət",
+      ["Bank sistemi", "Media qurumları", "Beynəlxalq şirkətlər"], "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("Siyasi partiyalar və həmkarlar ittifaqları hansı növ subyektlərə aiddir?", "Qeyri-dövlət subyektlər",
+      ["Dövlət subyektləri", "Passiv subyektlər", "Beynəlxalq subyektlər"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("Aşağıdakılardan hansı müasir sosial hərəkata misaldır?", "Yaşıllar hərəkatı",
+      ["Konstitusiya Məhkəməsi", "Mərkəzi Bank", "Nazirlər Kabineti"], "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+  ],
+  // ---- Səviyyə 2 ----
+  [
+    Q("QHT-lərin birinci fəaliyyət istiqaməti nədir?", "Təbii fəlakətlər zamanı xeyriyyə yardımlarının bölüşdürülməsi",
+      ["Xarici valyuta ticarəti", "Hərbi təchizat", "Vergi yığımı"], "Sosial siyasətin obyekti və subyekti"),
+    Q("QHT-lərin ikinci fəaliyyət istiqaməti nədən ibarətdir?", "Məşğulluğun stimullaşdırılması və yerli iqtisadiyyatın inkişafı",
+      ["Xarici borcların artırılması", "Hərbi sənayenin inkişafı", "Turizmin tənzimlənməsi"], "Sosial siyasətin obyekti və subyekti"),
+    Q("QHT-lərin üçüncü fəaliyyət istiqamətinə hansı layihələr misal göstərilir?", "Ailə planlaşdırılması və cinsi tərbiyə layihələri",
+      ["Hərbi təlim proqramları", "Xarici investisiya layihələri", "Neft-qaz kəşfiyyatı"], "Sosial siyasətin obyekti və subyekti"),
+    Q("Dövlət sosial siyasətinin iki tipindən birincisi necə adlanır?", "Qalıq (residual) tipi",
+      ["İnstitusional tip", "Liberal tip", "Sosialist tipi"], "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("İnstitusional tip sosial siyasətin tipik nümayəndəsi hansı modeldir?", "İsveç modeli (sosial dövlət)",
+      ["Amerika modeli", "Yaponiya modeli", "Çin modeli"], "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("Qalıq (residual) tip sosial siyasətin tipik nümayəndəsi hansı modeldir?", "Amerika modeli",
+      ["İsveç modeli", "Alman modeli", "Fransa modeli"], "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("Mətnə görə siyasi partiyalar əsasən nəyə təsir göstərir?", "İctimai rəyin formalaşmasına",
+      ["Mərkəzi Bankın faiz dərəcəsinə", "Xarici ticarət tarazlığına", "Hava proqnozuna"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("Həmkarlar ittifaqları kimin özünütəşkil formasıdır?", "Zəhmətkeşlərin (ilk növbədə muzdlu işçilərin)",
+      ["Yalnız dövlət məmurlarının", "Yalnız sahibkarların", "Xarici diplomatların"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+  ],
+  // ---- Səviyyə 3 ----
+  [
+    Q("Dövlətin sosial siyasətin aparıcı subyekti olmasını şərtləndirən amillərdən birinə görə dövlətin qərarları necədir?",
+      "Bütün vətəndaşlar üçün məcburidir", ["Yalnız tövsiyə xarakterlidir", "Yalnız bələdiyyələr üçün keçərlidir", "Könüllü icra olunur"],
+      "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("Mətndə göstərilən BƏT-in birləşmək azadlığı və təşkilatlanma hüququ Konvensiyası neçənci ildə qəbul edilib?",
+      "1948", ["1945", "1960", "1975"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("BMT İnsan Hüquqları Bəyannaməsinin hansı maddəsi həmkarlar ittifaqı yaratmaq hüququnu təsbit edir?",
+      "Maddə 23", ["Maddə 1", "Maddə 10", "Maddə 30"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("\"Həmkarlar İttifaqları haqqında\" Azərbaycan Respublikasının Qanunu neçənci ildə qəbul edilib?",
+      "1994", ["1991", "2000", "1993"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("Azərbaycan Həmkarlar İttifaqları Konfederasiyası (AHİK) neçənci ildə yaradılıb?",
+      "1993", ["1994", "1992", "2000"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("AHİK neçənci ildən Beynəlxalq Azad Həmkarlar İttifaqları Konfederasiyasının üzvüdür?",
+      "2000", ["1993", "1992", "1998"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("Klassik \"trade union\" tipli həmkarlar ittifaqları ilk dəfə harada yaranıb?",
+      "Böyük Britaniyada", ["ABŞ-da", "Fransada", "Almaniyada"], "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("\"Sarı\" (\"cib\") həmkarlar ittifaqları kim tərəfindən nəzarət olunur?",
+      "Müəssisənin administrasiyası tərəfindən", ["Beynəlxalq təşkilatlar tərəfindən", "Dövlət məhkəməsi tərəfindən", "Sərbəst işçi məclisi tərəfindən"],
+      "Sosial siyasətin qeyri-dövlət subyektləri"),
+  ],
+  // ---- Səviyyə 4 ----
+  [
+    Q("Azərbaycan Vətən Müharibəsi Veteranları Birliyi neçənci ildən fəaliyyət göstərir?",
+      "1994", ["1991", "2000", "1988"], "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+    Q("Azərbaycan Qızıl Aypara Cəmiyyəti Beynəlxalq Qızıl Xaç Hərəkatının neçə tərkib hissəsindən birinə aiddir?",
+      "Üç", ["İki", "Dörd", "Beş"], "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+    Q("Müasir sosial hərəkatların yaranma amillərindən biri hansıdır?",
+      "Qərbi Avropada fəhlə və həmkarlar ittifaqı hərəkatının böhranı",
+      ["Ümumdünya İqtisadi Forumunun yaradılması", "Sənaye inqilabının başlanması", "Soyuq müharibənin sona çatması ilə bağlı sülh sazişləri"],
+      "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+    Q("Müasir sosial hərəkatların iri beynəlxalq görüşləri mətndə hansı şəhərlərlə bağlı göstərilir?",
+      "Paris, Sietl, Cenevrə, Praqa", ["London, Nyu-York, Tokio", "Bakı, Moskva, Ankara", "Berlin, Roma, Madrid"],
+      "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+    Q("Baş Kollektiv Sazişlər hansı tərəflər arasında bağlanır?",
+      "AHİK, Nazirlər Kabineti və Sahibkarlar (İşəgötürənlər) Təşkilatları",
+      ["Yalnız Mərkəzi Bank və kommersiya bankları", "Yalnız QHT-lər arasında", "Yalnız bələdiyyələr arasında"],
+      "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("Klassik trade-yunionizm ideologiyası həmkarlar ittifaqlarının vəzifələrini nə ilə məhdudlaşdırır?",
+      "İş qüvvəsinin satış şəraitinin və maaşın yaxşılaşdırılması ilə",
+      ["Siyasi hakimiyyət uğrunda mübarizə ilə", "Beynəlxalq ticarətin tənzimlənməsi ilə", "Dini fəaliyyətin təşkili ilə"],
+      "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("Mətndə qloballaşma prosesləri müasir sosial hərəkatların yaranmasında hansı rolu oynayır?",
+      "Humanist və demokratik dəyərlərin müdafiəsi zəminində müqavimətin obyektiv əsasına çevrilir",
+      ["Sosial hərəkatların tamamilə sıradan çıxmasına səbəb olur", "Yalnız iqtisadi artıma xidmət edir", "Yalnız dövlətlərarası hərbi ittifaqlar yaradır"],
+      "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+    Q("Mətnə görə sosial proqramlara xərclərin artırılması nəyə səbəb ola bilər?",
+      "İstehsalın artımının və effektivliyinin azalmasına",
+      ["İstehsalın sürətlə artmasına", "İşsizliyin tamamilə aradan qalxmasına", "İnflyasiyanın dərhal dayanmasına"],
+      "Dövlət sosial siyasətin əsas subyekti kimi"),
+  ],
+  // ---- Səviyyə 5 ----
+  [
+    Q("Mətnə görə azad rəqabət sahəsinin genişləndirilməsi nəyə səbəb olur?",
+      "İstehsalın aktivləşməsinə, lakin sosial diferensiasiyanı və konfliktləri gücləndirir",
+      ["Yalnız sosial ədalətin bərqərar olmasına", "Sosial xərclərin avtomatik artmasına", "Bütün sosial problemlərin həllinə"],
+      "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("Mətndə göstərilən ikinci tip həmkarlar ittifaqları necə səciyyələndirilir?",
+      "Zəhmətkeşlərin bütünlükdə sosial vəziyyətlərinin təşkili əsasında fəaliyyət göstərən ittifaqlar",
+      ["Yalnız maaş məsələləri ilə məşğul olan ittifaqlar", "Administrasiya tərəfindən yaradılan ittifaqlar", "Yalnız beynəlxalq səviyyədə fəaliyyət göstərən ittifaqlar"],
+      "Sosial siyasətin qeyri-dövlət subyektləri"),
+    Q("Solçu siyasi hərəkatların ideoloji böhranının ikinci səbəbi mətndə nə ilə əlaqələndirilir?",
+      "SSRİ və sovet bloku ölkələrində baş vermiş antitotalitar inqilablarla",
+      ["Sənaye inqilabının başa çatması ilə", "Avropa İttifaqının yaradılması ilə", "Soyuq müharibənin başlanması ilə"],
+      "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+    Q("Üçüncü dünya ölkələrində milli-azadlıq hərəkatlarının böhranı mətndə nə ilə izah olunur?",
+      "Yeni hökumətlərin yoxsulluq, işsizlik, savadsızlıq kimi problemləri həll edə bilməməsi",
+      ["Bu ölkələrin sənayeləşmədə liderliyə çatması", "Bu hərəkatların beynəlxalq tanınma qazanması", "Bu ölkələrdə demokratiyanın tam bərqərar olması"],
+      "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+    Q("Dövlətin bazara müdaxiləsinin səbəbi kimi mətndə hansı nümunə göstərilir?",
+      "Yüksək qiymətlərin aşağı keyfiyyətli (hətta zərərli) malların istehlakını stimullaşdıra bilməsi",
+      ["Bütün malların qiymətinin aşağı olması", "İstehlakçıların həmişə öz maraqlarına uyğun hərəkət etməsi", "Bazarın öz-özünə tam tarazlaşması"],
+      "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("İnstitusional tip sosial siyasət hansı ideologiyanın təsiri altında formalaşır?",
+      "Sosial-demokrat ideologiyası", ["Konservatizm", "Klassik liberalizm", "Marksizm-leninizm"],
+      "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("Qalıq (residual) tip sosial siyasətin konseptual əsasları hansı ideyaların təsiri ilə formalaşır?",
+      "Konservatizm ideyaları", ["Sosial-demokratiya ideyaları", "Anarxizm ideyaları", "Kommunizm ideyaları"],
+      "Dövlət sosial siyasətin əsas subyekti kimi"),
+    Q("Müasir sosial hərəkatların sosial tərkibinin genişlənməsi mətndə hansı proseslə izah olunur?",
+      "Sənaye fəhlə sinfinin xüsusi çəkisinin azalması və \"kənara çıxarılmış\" təbəqələrin (işsiz, evsiz və s.) artması",
+      ["Kənd əhalisinin tamamilə şəhərlərə köçməsi", "Dövlət qulluqçularının sayının azalması", "Bütün ölkələrdə əhalinin sürətlə artması"],
+      "Müasir sosial hərəkatlar və ictimai təşkilatlar"),
+  ],
+];
+
+/* Futbolçu roster — uydurma adlar, klub emblemi/real şəxs yoxdur */
+const ROSTER = [
+  { id:'p1', name:'Kapitan Tural', num:10, jersey:'#e04a52', trim:'#ffffff' },
+  { id:'p2', name:'Sürətli Orxan', num:7,  jersey:'#1b6fd6', trim:'#ffd35c' },
+  { id:'p3', name:'Snayper Aydın', num:9,  jersey:'#25c45f', trim:'#0a2415' },
+  { id:'p4', name:'Divar Rauf',    num:5,  jersey:'#ffd35c', trim:'#08240f' },
+  { id:'p5', name:'Ox Kamran',     num:11, jersey:'#7f4fd6', trim:'#ffffff' },
+  { id:'p6', name:'Ulduz Elvin',   num:8,  jersey:'#ff9d1c', trim:'#08240f' },
+];
+</script>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------------- Sabitlər ---------------- */
+const TIME  = 15;
+const CIRC  = 276.46;
+const LETTERS = ['A','B','C','D'];
+const SEEN_KEY  = 'penalti.sosial2.seen.v1';
+const BEST_KEY  = 'penalti.sosial2.best.v1';
+const SOUND_KEY = 'penalti.sosial2.sound.v1';
+const TOTAL = BANK.reduce((n, lvl) => n + lvl.length, 0);
+
+/* ---------------- Yaddaş ---------------- */
+const mem = {};
+const store = {
+  get(k, d){ try { const v = window.localStorage.getItem(k); if (v !== null) return JSON.parse(v); } catch(e){} return k in mem ? mem[k] : d; },
+  set(k, v){ try { window.localStorage.setItem(k, JSON.stringify(v)); } catch(e){} mem[k] = v; }
+};
+
+/* ---------------- Köməkçilər ---------------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const pending = new Set();
+function later(fn, ms){ const id = setTimeout(() => { pending.delete(id); fn(); }, ms); pending.add(id); return id; }
+function clearLater(){ pending.forEach(clearTimeout); pending.clear(); }
+
+/* ---------------- Səs ---------------- */
+const Sound = (() => {
+  let ctx=null, on=store.get(SOUND_KEY,true);
+  function ensure(){ if(!ctx){ const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return null; try{ctx=new AC();}catch(e){return null;} } if(ctx.state==='suspended') ctx.resume(); return ctx; }
+  function tone(f,d,type='sine',v=.12,delay=0,f2){ if(!on) return; const c=ensure(); if(!c) return; const t=c.currentTime+delay,o=c.createOscillator(),g=c.createGain();
+    o.type=type; o.frequency.setValueAtTime(f,t); if(f2) o.frequency.exponentialRampToValueAtTime(f2,t+d);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(v,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+d+.05); }
+  function noise(d,v=.15,delay=0){ if(!on) return; const c=ensure(); if(!c) return; const t=c.currentTime+delay;
+    const n=c.createBufferSource(); const buf=c.createBuffer(1, c.sampleRate*d, c.sampleRate); const data=buf.getChannelData(0);
+    for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*(1-i/data.length);
+    n.buffer=buf; const g=c.createGain(); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    n.connect(g); g.connect(c.destination); n.start(t); }
+  return {
+    get on(){return on;},
+    unlock(){ if(on) ensure(); },
+    toggle(){ on=!on; store.set(SOUND_KEY,on); if(on) ensure(); return on; },
+    whistle(){ tone(1500,.18,'square',.1); tone(1500,.18,'square',.1,.22); },
+    tick(){ tone(1100,.04,'square',.03); },
+    kick(){ noise(.12,.28); tone(120,.1,'sine',.15); },
+    goal(){ [523.3,659.3,784,1046.5,1318.5].forEach((f,i)=>tone(f,i===4?.6:.16,'triangle',.15,i*.11)); noise(.4,.12,.05); },
+    save(){ tone(220,.3,'sawtooth',.12); noise(.2,.18,.05); },
+    crowdSad(){ tone(180,.5,'sawtooth',.05,0,120); },
+  };
+})();
+
+/* ---------------- Sual seçimi (təkrarsız) ---------------- */
+function seenList(){ const s = store.get(SEEN_KEY, []); return Array.isArray(s) ? s : []; }
+const keyOf = (li,i) => 'L'+li+':'+i;
+function pickQuestions(){
+  const seen = seenList();
+  return BANK.map((pool, li) => {
+    let avail = pool.map((_,i)=>i).filter(i => !seen.includes(keyOf(li,i)));
+    let reset = false;
+    if (!avail.length) { avail = pool.map((_,i)=>i); reset = true; }
+    const i = pick(avail);
+    return Object.assign({ level: li+1, li, idx:i, reset }, pool[i]);
+  });
+}
+function markSeen(q){
+  let seen = seenList();
+  if (q.reset) { seen = seen.filter(k => !k.startsWith('L'+q.li+':')); q.reset = false; }
+  const k = keyOf(q.li, q.idx);
+  if (!seen.includes(k)) seen.push(k);
+  store.set(SEEN_KEY, seen);
+}
+function updateStart(){
+  const seen = seenList().length;
+  els.bankInfo.textContent = 'Sual bazasında ' + TOTAL + ' sual var. Bu dövrdə görülən suallar: ' + seen + ' / ' + TOTAL + '.';
+}
+
+/* ---------------- Oyunçu fiqurları (SVG) ---------------- */
+function playerSvg(p, opts){
+  opts = opts || {};
+  const pose = opts.pose || 'stand'; // stand | run | kick
+  const legL = pose==='kick' ? 'M22 44 L14 58 L10 66' : pose==='run' ? 'M22 44 L16 52 L20 66' : 'M22 44 L20 55 L20 66';
+  const legR = pose==='kick' ? 'M30 44 L40 40 L48 34' : pose==='run' ? 'M30 44 L38 50 L34 66' : 'M30 44 L32 55 L32 66';
+  return '' +
+  '<svg class="fig" viewBox="0 0 60 70" xmlns="http://www.w3.org/2000/svg">' +
+    '<ellipse class="shadow" cx="28" cy="67" rx="16" ry="3"/>' +
+    '<path d="'+legL+'" stroke="url(#skinGrad)" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '<path d="'+legR+'" stroke="url(#skinGrad)" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '<circle cx="'+(pose==='kick'?10:pose==='run'?20:20)+'" cy="'+(pose==='kick'?66:66)+'" r="4" fill="'+p.trim+'"/>' +
+    '<circle cx="'+(pose==='kick'?48:pose==='run'?34:32)+'" cy="'+(pose==='kick'?34:66)+'" r="4" fill="'+p.trim+'"/>' +
+    '<rect x="14" y="20" width="22" height="26" rx="8" fill="'+p.jersey+'"/>' +
+    '<rect x="14" y="20" width="22" height="8" rx="4" fill="'+p.trim+'" opacity=".85"/>' +
+    '<text x="25" y="38" font-family="Montserrat,sans-serif" font-weight="900" font-size="11" fill="'+p.trim+'" text-anchor="middle">'+p.num+'</text>' +
+    '<path d="M14 26 L4 20 L6 30 Z" fill="'+p.jersey+'"/>' +
+    '<path d="M36 26 L46 18 L46 30 Z" fill="'+p.jersey+'"/>' +
+    '<circle class="skin" cx="25" cy="12" r="9"/>' +
+    '<path d="M17 10a8 8 0 0 1 16 0v-2a8 8 0 0 0-16 0z" fill="#2a1a10"/>' +
+  '</svg>';
+}
+function gkSvg(p){
+  return '' +
+  '<svg class="fig" viewBox="0 0 52 70" xmlns="http://www.w3.org/2000/svg">' +
+    '<ellipse class="shadow" cx="26" cy="67" rx="14" ry="3"/>' +
+    '<path d="M20 44 L16 58 L16 66" stroke="url(#skinGrad)" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '<path d="M28 44 L32 58 L32 66" stroke="url(#skinGrad)" stroke-width="7" fill="none" stroke-linecap="round"/>' +
+    '<rect x="12" y="20" width="24" height="26" rx="8" fill="#2a2f6b"/>' +
+    '<rect x="12" y="20" width="24" height="8" rx="4" fill="#ffd35c" opacity=".85"/>' +
+    '<path d="M12 26 L2 18 L4 30 Z" fill="#2a2f6b"/>' +
+    '<path d="M36 26 L46 18 L44 30 Z" fill="#2a2f6b"/>' +
+    '<circle cx="6" cy="20" r="5" fill="#2a2f6b"/><circle cx="44" cy="20" r="5" fill="#2a2f6b"/>' +
+    '<circle class="skin" cx="24" cy="12" r="9"/>' +
+    '<path d="M16 10a8 8 0 0 1 16 0v-2a8 8 0 0 0-16 0z" fill="#1a1108"/>' +
+  '</svg>';
+}
+function ballSvg(){
+  return '<svg viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">' +
+    '<circle cx="13" cy="13" r="12" fill="url(#skinGrad2)"/>' +
+    '<defs><radialGradient id="skinGrad2" cx="35%" cy="30%" r="75%">' +
+    '<stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#cfd6de"/></radialGradient></defs>' +
+    '<path d="M13 6 L17 9 L15.5 14 L10.5 14 L9 9 Z" fill="#12161d"/>' +
+    '<path d="M13 6 L13 2 M17 9 L21 7 M15.5 14 L18 18 M10.5 14 L8 18 M9 9 L5 7" stroke="#12161d" stroke-width="1.3" fill="none"/>' +
+  '</svg>';
+}
+function jerseyIcon(p){
+  return '<svg viewBox="0 0 60 66" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M14 6 4 14 8 24 14 20 14 60 46 60 46 20 52 24 56 14 46 6 40 10a10 10 0 0 1-20 0z" fill="'+p.jersey+'"/>' +
+    '<path d="M14 6 4 14 8 24 14 20z M46 6 56 14 52 24 46 20z" fill="'+p.jersey+'" opacity=".75"/>' +
+    '<text x="30" y="42" font-family="Montserrat,sans-serif" font-weight="900" font-size="18" fill="'+p.trim+'" text-anchor="middle">'+p.num+'</text>' +
+  '</svg>';
+}
+
+/* ---------------- DOM ---------------- */
+const els = {
+  screens: { start: $('#screen-start'), game: $('#screen-game'), end: $('#screen-end') },
+  bankInfo: $('#bankInfo'), roster: $('#roster'), pname: $('#pname'), btnStart: $('#btnStart'),
+  qtext: $('#qtext'), src: $('#src'),
+  timer: $('#timer'), tbar: $('#tbar'), tnum: $('#tnum'),
+  kicks: $('#kicks'), lvlText: $('#lvlText'), lvlStars: $('#lvlStars'),
+  whoJersey: $('#whoJersey'), whoName: $('#whoName'),
+  actor: $('#actor'), ball: $('#ball'), gk: $('#gk'), goal: $('#goal'), banner: $('#rbanner'),
+  btnSound: $('#btnSound'), confetti: $('#confetti'), sr: $('#sr')
+};
+const slots = [...document.querySelectorAll('.arow .slot')];
+
+/* ---------------- Vəziyyət ---------------- */
+const G = { player:null, name:'', qs:[], i:0, opts:[], results:[], locked:true, over:true, kicking:false };
+
+function show(name){ Object.entries(els.screens).forEach(([k,el]) => el.classList.toggle('active', k===name)); window.scrollTo(0,0); }
+function announce(msg){ els.sr.textContent=''; setTimeout(()=>{ els.sr.textContent = msg; }, 30); }
+
+/* ---------------- Roster ekranı ---------------- */
+function buildRoster(){
+  els.roster.innerHTML = ROSTER.map(p =>
+    '<button type="button" class="pcard" data-id="'+p.id+'" aria-pressed="false">' +
+      '<span class="jersey">'+jerseyIcon(p)+'</span><b>'+esc(p.name)+'</b><small>№ '+p.num+'</small>' +
+    '</button>'
+  ).join('');
+  [...els.roster.querySelectorAll('.pcard')].forEach(btn => btn.addEventListener('click', () => {
+    G.player = ROSTER.find(p => p.id === btn.dataset.id);
+    [...els.roster.querySelectorAll('.pcard')].forEach(b => { b.classList.toggle('sel', b===btn); b.setAttribute('aria-pressed', String(b===btn)); });
+    els.btnStart.disabled = false;
+  }));
+}
+
+/* ---------------- Taymer ---------------- */
+const T = { left: TIME, end: 0, running: false, raf: 0, shown: TIME+1 };
+function renderTimer(){
+  const s = Math.ceil(T.left);
+  els.tnum.textContent = s;
+  els.tbar.style.strokeDashoffset = String(CIRC * (1 - T.left/TIME));
+  els.timer.classList.toggle('warn', s<=8 && s>5);
+  els.timer.classList.toggle('crit', s<=5);
+}
+function loop(){
+  if (!T.running) return;
+  T.left = Math.max(0, (T.end - Date.now())/1000);
+  const s = Math.ceil(T.left);
+  if (s !== T.shown) { T.shown = s; if (s<=5 && s>0) Sound.tick(); }
+  renderTimer();
+  if (T.left <= 0) { T.running=false; timeUp(); return; }
+  T.raf = requestAnimationFrame(loop);
+}
+function startTimer(){ T.left=TIME; T.shown=TIME+1; renderTimer(); T.running=true; T.end=Date.now()+TIME*1000; T.raf=requestAnimationFrame(loop); }
+function stopTimer(){ T.running=false; cancelAnimationFrame(T.raf); }
+
+/* ---------------- Oyunun gedişi ---------------- */
+function startGame(){
+  clearLater(); stopTimer(); Sound.unlock();
+  els.confetti.innerHTML = '';
+  G.name = els.pname.value.trim();
+  G.qs = pickQuestions(); G.i = 0; G.results = []; G.over = false; G.locked = false; G.kicking = false;
+  els.whoJersey.innerHTML = jerseyIcon(G.player);
+  els.whoName.textContent = G.name ? (G.name + ' • ' + G.player.name) : G.player.name;
+  buildKicksHud();
+  els.actor.innerHTML = playerSvg(G.player, {pose:'stand'});
+  els.gk.innerHTML = gkSvg(G.player);
+  els.ball.innerHTML = ballSvg();
+  resetPitchPositions();
+  show('game'); Sound.whistle();
+  showQuestion();
+}
+
+function buildKicksHud(){
+  els.kicks.innerHTML = G.qs.map((_,i) => '<span class="dot' + (i===0?' cur':'') + '" data-i="'+i+'"></span>').join('');
+}
+function refreshKicksHud(){
+  [...els.kicks.children].forEach((d,i) => {
+    d.className = 'dot' + (G.results[i]==='goal' ? ' goal' : G.results[i]==='miss' ? ' miss' : '') + (i===G.i && !G.over ? ' cur' : '');
+  });
+}
+function resetPitchPositions(){
+  els.actor.style.left='50%'; els.actor.style.bottom='6%';
+  els.ball.style.left='50%'; els.ball.style.bottom='9%'; els.ball.style.top='auto'; els.ball.style.transform='translate(-50%,0)';
+  els.gk.style.left='50%';
+  els.goal.classList.remove('ripple');
+  els.banner.className='result-banner'; els.banner.textContent='';
+}
+
+function showQuestion(){
+  const q = G.qs[G.i];
+  resetPitchPositions();
+  els.actor.innerHTML = playerSvg(G.player, {pose:'stand'});
+  G.locked = false; G.opts = shuffle(q.a.map((t,k) => ({ t, ok: k===0 })));
+  els.qtext.textContent = q.q;
+  slots.forEach((s,k) => { s.className='slot'; s.querySelector('.t').textContent = G.opts[k].t; s.querySelector('button').disabled=false; });
+  els.src.textContent = '';
+  els.lvlText.textContent = 'Zərbə ' + (G.i+1) + ' / ' + G.qs.length + ' — Səviyyə ' + q.level;
+  els.lvlStars.textContent = '★'.repeat(q.level) + '☆'.repeat(5-q.level);
+  refreshKicksHud(); markSeen(q);
+  announce('Sual ' + (G.i+1) + '. ' + q.q);
+  startTimer();
+}
+
+function lockSlots(){ slots.forEach(s => { s.classList.add('locked'); s.querySelector('button').disabled=true; }); }
+
+function choose(i){
+  if (G.locked || G.over || G.kicking) return;
+  G.locked = true; stopTimer(); lockSlots();
+  const ok = G.opts[i].ok, okIdx = G.opts.findIndex(o=>o.ok);
+  slots[i].classList.add('sel');
+  els.src.textContent = 'Mənbə: ' + G.qs[G.i].src;
+  announce(ok ? 'Düzgün cavab seçildi.' : 'Səhv cavab seçildi.');
+  later(() => {
+    slots[i].classList.remove('sel');
+    slots[i].classList.add(ok ? 'correct' : 'wrong');
+    if (!ok) slots[okIdx].classList.add('correct');
+    runPenalty(ok);
+  }, 900);
+}
+
+function timeUp(){
+  if (G.locked || G.over) return;
+  G.locked = true; lockSlots();
+  const okIdx = G.opts.findIndex(o=>o.ok);
+  slots[okIdx].classList.add('correct');
+  els.src.textContent = 'Mənbə: ' + G.qs[G.i].src;
+  announce('Vaxt bitdi.');
+  runPenalty(false, true);
+}
+
+/* ---------------- Penalti animasiyası ---------------- */
+function runPenalty(correct, timedOut){
+  G.kicking = true;
+  const zoneX = { L:'20%', C:'50%', R:'80%' };
+  const target = pick(['L','C','R']);
+  const gkGoes = correct ? pick(Object.keys(zoneX).filter(z => z !== target)) : target;
+
+  els.actor.innerHTML = playerSvg(G.player, {pose:'run'});
+  els.actor.style.left = '50%'; els.actor.style.bottom = '20%';
+
+  later(() => {
+    els.actor.innerHTML = playerSvg(G.player, {pose:'kick'});
+    Sound.kick();
+    els.ball.style.left = zoneX[target];
+    els.ball.style.bottom = '58%';
+    els.ball.style.transform = 'translate(-50%,0) scale(.7)';
+    els.gk.style.left = zoneX[gkGoes];
+  }, 650);
+
+  later(() => {
+    if (correct) {
+      els.goal.classList.add('ripple');
+      Sound.goal();
+      banner('QOL! ⚽', false);
+      launchConfetti(24);
+    } else {
+      els.ball.style.left = zoneX[gkGoes];
+      els.ball.style.bottom = '46%';
+      Sound.save(); Sound.crowdSad();
+      banner(timedOut ? 'VAXT BİTDİ!' : 'TUTULDU!', true);
+    }
+  }, 1250);
+
+  later(() => {
+    G.results[G.i] = correct ? 'goal' : 'miss';
+    refreshKicksHud();
+    G.i++;
+    if (G.i >= G.qs.length) { endGame(); }
+    else { G.kicking = false; showQuestion(); }
+  }, 2500);
+}
+
+function banner(text, bad){ els.banner.textContent = text; els.banner.className = 'result-banner show' + (bad ? ' bad' : ''); }
+
+/* ---------------- Oyunun sonu ---------------- */
+function endGame(){
+  G.over = true; stopTimer();
+  const goals = G.results.filter(r => r==='goal').length;
+  const total = G.qs.length;
+  $('#endTitle').textContent = goals===total ? 'Əla nəticə!' : goals===0 ? 'Bu dəfə alınmadı' : 'Oyun bitdi';
+  $('#endScore').innerHTML = goals + ' / ' + total + '<small>QOL</small>';
+  $('#endText').textContent = (G.name ? G.name + ', ' : '') + G.player.name + ' adından ' + total + ' zərbədən ' + goals + '-i qapıya yollandı.';
+
+  const rev = $('#endReview');
+  rev.innerHTML = G.qs.map((q,i) => {
+    const r = G.results[i];
+    return '<div class="item"><small>Zərbə ' + (i+1) + ' • Səviyyə ' + q.level + ' • Mənbə: ' + esc(q.src) + '</small><br>' +
+      esc(q.q) + '<br><span class="' + (r==='goal' ? 'ok">Qol! Düzgün cavab' : 'no">Tutuldu. Düzgün cavab') + ': ' + esc(q.a[0]) + '</span></div>';
+  }).join('');
+
+  const best = store.get(BEST_KEY, 0);
+  if (goals > best) store.set(BEST_KEY, goals);
+
+  show('end');
+  if (goals === total) launchConfetti(90);
+  $('#endTitle').setAttribute('tabindex','-1'); $('#endTitle').focus({preventScroll:true});
+}
+
+function launchConfetti(n){
+  const colors = ['#ffd35c','#ff9d1c','#25c45f','#ffffff','#e04a52','#1b6fd6'];
+  for (let i=0;i<n;i++){
+    const s = document.createElement('span');
+    s.style.left = rnd(0,100) + '%';
+    s.style.background = pick(colors);
+    s.style.setProperty('--dx', rnd(-120,120) + 'px');
+    s.style.animationDuration = rnd(2.4,4.6) + 's';
+    s.style.animationDelay = rnd(0,1.2) + 's';
+    els.confetti.appendChild(s);
+  }
+}
+
+/* ---------------- Hadisələr ---------------- */
+els.btnStart.addEventListener('click', startGame);
+$('#btnNext').addEventListener('click', () => {
+  els.confetti.innerHTML = '';
+  [...els.roster.querySelectorAll('.pcard')].forEach(b => { b.classList.remove('sel'); b.setAttribute('aria-pressed','false'); });
+  els.pname.value = ''; G.player = null; els.btnStart.disabled = true;
+  updateStart(); show('start');
+});
+$('#btnHome').addEventListener('click', () => { els.confetti.innerHTML=''; updateStart(); show('start'); });
+$('#btnResetBank').addEventListener('click', () => { store.set(SEEN_KEY, []); updateStart(); });
+slots.forEach((s,i) => s.querySelector('button').addEventListener('click', () => choose(i)));
+els.btnSound.addEventListener('click', () => {
+  const on = Sound.toggle();
+  els.btnSound.textContent = on ? 'Səs: açıq' : 'Səs: bağlı';
+  els.btnSound.setAttribute('aria-pressed', String(on));
+});
+document.addEventListener('keydown', e => {
+  if (!els.screens.game.classList.contains('active') || G.locked || G.over || G.kicking) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const map = { a:0, b:1, c:2, d:3, '1':0, '2':1, '3':2, '4':3 };
+  const k = e.key.toLowerCase();
+  if (k in map) { e.preventDefault(); choose(map[k]); }
+});
+
+/* Başlanğıc */
+els.btnSound.textContent = Sound.on ? 'Səs: açıq' : 'Səs: bağlı';
+els.btnSound.setAttribute('aria-pressed', String(Sound.on));
+buildRoster(); updateStart();
+})();
+</script>
+</body>
+</html>
